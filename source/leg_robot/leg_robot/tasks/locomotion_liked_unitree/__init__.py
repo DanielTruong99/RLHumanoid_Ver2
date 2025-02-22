@@ -18,7 +18,7 @@ gym.register(
 
 gym.register(
     id="RoughWalkingRobot-Play-v3",
-    entry_point="leg_robot.tasks.locomotion_liked_unitree.walking_robot:WalkingRobotEnv:WalkingRobotEnv",
+    entry_point="leg_robot.tasks.locomotion_liked_unitree.walking_robot:WalkingRobotEnv",
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": WalkingRobotEnvPLayCfg,

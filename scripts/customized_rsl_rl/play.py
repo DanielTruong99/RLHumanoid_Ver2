@@ -46,7 +46,7 @@ from isaaclab_tasks.utils import get_checkpoint_path, parse_env_cfg
 
 # Import extensions to set up environment tasks
 import leg_robot.tasks  # noqa: F401
-
+from scripts.customized_rsl_rl.customized_exporter import _CustomizedTorchPolicyExporter as _TorchPolicyExporter
 
 def main():
     """Play with RSL-RL agent."""
@@ -89,17 +89,13 @@ def main():
     ppo_runner = OnPolicyRunner(env, agent_cfg.to_dict(), log_dir=None, device=agent_cfg.device)
     ppo_runner.load(resume_path)
 
+    # export policy to jit
+    export_model_dir = os.path.join(os.path.dirname(resume_path), "exported")
+    policy_exporter = _TorchPolicyExporter(ppo_runner.alg.actor_critic, ppo_runner.obs_normalizer)
+    policy_exporter.export(export_model_dir, "policy.pt")
+
     # obtain the trained policy for inference
     policy = ppo_runner.get_inference_policy(device=env.unwrapped.device)
-
-    # export policy to onnx/jit
-    export_model_dir = os.path.join(os.path.dirname(resume_path), "exported")
-    export_policy_as_jit(
-        ppo_runner.alg.actor_critic, ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.pt"
-    )
-    export_policy_as_onnx(
-        ppo_runner.alg.actor_critic, normalizer=ppo_runner.obs_normalizer, path=export_model_dir, filename="policy.onnx"
-    )
 
     # reset environment
     obs, _ = env.get_observations()
