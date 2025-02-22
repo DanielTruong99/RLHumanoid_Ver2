@@ -1,12 +1,10 @@
 import os
 import isaaclab.sim as sim_utils
-from isaaclab
-from omni.isaac.lab.actuators import ActuatorNetMLPCfg, DCMotorCfg, ImplicitActuatorCfg, IdealPDActuatorCfg
-from omni.isaac.lab.assets.articulation import ArticulationCfg
-from exts.rl_robot.rl_robot.lab_assets import LOCAL_ASSETS_DATA_DIR
+from isaaclab.actuators import ActuatorNetMLPCfg, DCMotorCfg, ImplicitActuatorCfg, IdealPDActuatorCfg
+from isaaclab.assets.articulation import ArticulationCfg
+from leg_robot.assets import LOCAL_ASSETS_DATA_DIR
 
 LEGPARKOUR_USD_PATH = f"{LOCAL_ASSETS_DATA_DIR}/Robots/Aidin/leg00/leg00.usd"
-# LEGPARKOUR_USD_PATH = "/home/ryz2/DanielWorkspace/RL/ROS2_IsaacSim_Validation/usd/leg00/leg00.usd"
 
 LEGPARKOUR_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
