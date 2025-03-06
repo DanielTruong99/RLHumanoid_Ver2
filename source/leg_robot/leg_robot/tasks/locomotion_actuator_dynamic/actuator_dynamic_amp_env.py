@@ -26,23 +26,24 @@ class ActuatorDynamicEnv(DirectRLEnv):
         super().__init__(cfg, render_mode, **kwargs)
 
         # action offset and scale
-        dof_lower_limits = self.robot.data.soft_joint_pos_limits[0, :, 0]
-        dof_upper_limits = self.robot.data.soft_joint_pos_limits[0, :, 1]
-        dof_torque_limits = self.robot.cfg.actuators["legs"].effort_limit
+        dof_torque_limits = torch.cat(
+            (self.robot.actuators["legs"].effort_limit, self.robot.actuators["feet"].effort_limit),
+            dim=1
+        )
         self.action_offset = 0.5 * ( 2.0 * dof_torque_limits )
-        self.action_scale = dof_upper_limits - dof_lower_limits
+        self.action_scale = 2.0 * dof_torque_limits
 
         # load motion
         self._motion_loader = MotionLoader(motion_file=self.cfg.motion_file, device=self.device) # type: ignore
 
         # DOF and key body indexes
         #! Need to be changed
-        key_body_names = ["right_hand", "left_hand", "right_foot", "left_foot"]
-        self.ref_body_index = self.robot.data.body_names.index(self.cfg.reference_body)
+        key_body_names = ["L_thigh", "L_calf", "L_toe"]
+        self.ref_body_index = self.robot.data.body_names.index('base')
         self.key_body_indexes = [self.robot.data.body_names.index(name) for name in key_body_names]
-        self.motion_dof_indexes = self._motion_loader.get_dof_index(self.robot.data.joint_names)
-        self.motion_ref_body_index = self._motion_loader.get_body_index([self.cfg.reference_body])[0]
-        self.motion_key_body_indexes = self._motion_loader.get_body_index(key_body_names)
+        self.motion_dof_indexes = self._motion_loader.get_dof_index([ 'left_hip_z', 'left_knee', 'left_ankle_x'])
+        self.motion_ref_body_index = self._motion_loader.get_body_index(['torso'])[0]
+        self.motion_key_body_indexes = self._motion_loader.get_body_index(["left_thigh", "left_shin", "left_foot"])
 
         # reconfigure AMP observation space according to the number of observations and create the buffer
         self.amp_observation_size = self.cfg.num_amp_observations * self.cfg.amp_observation_space

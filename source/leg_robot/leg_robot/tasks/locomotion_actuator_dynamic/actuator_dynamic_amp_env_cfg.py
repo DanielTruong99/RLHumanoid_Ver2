@@ -8,7 +8,7 @@ from __future__ import annotations
 import os
 from dataclasses import MISSING
 
-from isaaclab_assets import HUMANOID_28_CFG
+from leg_robot.assets import LEGACTUATORDYNAMIC_CFG
 
 from isaaclab.actuators import ImplicitActuatorCfg
 from isaaclab.assets import ArticulationCfg
@@ -22,7 +22,7 @@ MOTIONS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "motions"
 
 @configclass
 class ActuatorDynamicEnvCfg(DirectRLEnvCfg):
-    """Humanoid AMP environment config (base class)."""
+    """Actuator Dynamic AMP environment config (base class)."""
 
     # env
     episode_length_s = 10.0
@@ -38,8 +38,8 @@ class ActuatorDynamicEnvCfg(DirectRLEnvCfg):
     early_termination = True
     termination_height = 0.5
 
-    motion_file: str = MISSING
-    reference_body = "torso"
+    motion_file: str = os.path.join(MOTIONS_DIR, "humanoid_walk.npz")
+    reference_body = "base"
     reset_strategy = "random"  # default, random, random-start
     """Strategy to be followed when resetting each environment (humanoid's pose and joint states).
 
@@ -62,28 +62,6 @@ class ActuatorDynamicEnvCfg(DirectRLEnvCfg):
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=10.0, replicate_physics=True)
 
     # robot
-    robot: ArticulationCfg = HUMANOID_28_CFG.replace(prim_path="/World/envs/env_.*/Robot").replace(
-        actuators={
-            "body": ImplicitActuatorCfg(
-                joint_names_expr=[".*"],
-                velocity_limit=100.0,
-                stiffness=None,
-                damping=None,
-            ),
-        },
-    )
+    robot: ArticulationCfg = LEGACTUATORDYNAMIC_CFG.replace(prim_path="/World/envs/env_.*/Robot") # type: ignore
+    
 
-
-@configclass
-class HumanoidAmpDanceEnvCfg(HumanoidAmpEnvCfg):
-    motion_file = os.path.join(MOTIONS_DIR, "humanoid_dance.npz")
-
-
-@configclass
-class HumanoidAmpRunEnvCfg(HumanoidAmpEnvCfg):
-    motion_file = os.path.join(MOTIONS_DIR, "humanoid_run.npz")
-
-
-@configclass
-class HumanoidAmpWalkEnvCfg(HumanoidAmpEnvCfg):
-    motion_file = os.path.join(MOTIONS_DIR, "humanoid_walk.npz")
