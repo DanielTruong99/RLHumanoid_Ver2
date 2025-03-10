@@ -11,13 +11,13 @@ models:
     clip_log_std: True
     min_log_std: -20.0
     max_log_std: 2.0
-    initial_log_std: -2.9
-    fixed_log_std: True
+    initial_log_std: -1.5
+    fixed_log_std: False
     network:
       - name: net
         input: STATES
-        layers: [1024, 512]
-        activations: relu
+        layers: [256, 256, 256]
+        activations: elu
     output: ACTIONS
   value:  # see deterministic_model parameters
     class: DeterministicMixin
@@ -25,8 +25,8 @@ models:
     network:
       - name: net
         input: STATES
-        layers: [1024, 512]
-        activations: relu
+        layers: [256, 256, 256]
+        activations: elu
     output: ONE
   discriminator:  # see deterministic_model parameters
     class: DeterministicMixin
@@ -34,8 +34,8 @@ models:
     network:
       - name: net
         input: STATES
-        layers: [1024, 512]
-        activations: relu
+        layers: [256, 256, 256]
+        activations: elu
     output: ONE
 
 
@@ -62,7 +62,7 @@ reply_buffer:
 # https://skrl.readthedocs.io/en/latest/api/agents/amp.html
 agent:
   class: AMP
-  rollouts: 16
+  rollouts: 28
   learning_epochs: 6
   mini_batches: 2
   discount_factor: 0.99
@@ -86,8 +86,8 @@ agent:
   value_loss_scale: 2.5
   discriminator_loss_scale: 5.0
   amp_batch_size: 512
-  task_reward_weight: 0.0
-  style_reward_weight: 1.0
+  task_reward_weight: 1.0
+  style_reward_weight: 5.0
   discriminator_batch_size: 4096
   discriminator_reward_scale: 2.0
   discriminator_logit_regularization_scale: 0.05
@@ -97,7 +97,7 @@ agent:
   time_limit_bootstrap: False
   # logging and checkpoint
   experiment:
-    directory: "actuator_dynamic_amp_walk"
+    directory: "actuator_dynamic_amp"
     experiment_name: ""
     write_interval: auto
     checkpoint_interval: auto
@@ -107,5 +107,5 @@ agent:
 # https://skrl.readthedocs.io/en/latest/api/trainers/sequential.html
 trainer:
   class: SequentialTrainer
-  timesteps: 80000
+  timesteps: 100000
   environment_info: log

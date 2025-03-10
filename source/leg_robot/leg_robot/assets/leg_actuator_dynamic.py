@@ -4,7 +4,7 @@ from isaaclab.actuators import ActuatorNetMLPCfg, DCMotorCfg, ImplicitActuatorCf
 from isaaclab.assets.articulation import ArticulationCfg
 from leg_robot.assets import LOCAL_ASSETS_DATA_DIR
 
-LEGACTUATORDYNAMIC_USD_PATH = f"{LOCAL_ASSETS_DATA_DIR}/Robots/Aidin/leg00/leg00.usd"
+LEGACTUATORDYNAMIC_USD_PATH = f"{LOCAL_ASSETS_DATA_DIR}/Robots/Aidin/aidin_quadruped/aidin_quadruped.usd"
 
 LEGACTUATORDYNAMIC_CFG = ArticulationCfg(
     spawn=sim_utils.UsdFileCfg(
@@ -26,44 +26,28 @@ LEGACTUATORDYNAMIC_CFG = ArticulationCfg(
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.93),
         joint_pos={
-            'R_hip_joint': 0.0,
-            'R_hip2_joint': 0.0,
-            'R_thigh_joint': -0.2,
-            'R_calf_joint': 0.25,  # 0.6
-            'R_toe_joint': 0.0,
-            'L_hip_joint': 0.0,
-            'L_hip2_joint': 0.0,
-            'L_thigh_joint': -0.2,
-            'L_calf_joint': 0.25,  # 0.6
-            'L_toe_joint': 0.0,
+            'LFJ_scap': 0.0, # limit -35, 35 (degrees)
+            'LFJ_hip': 0.0, # limit -180, 180 (degrees)
+            'LFJ_knee': 0.0, # limit 0, 180 (degrees)
         },
         joint_vel={".*": 0.0},
     ),
-    soft_joint_pos_limit_factor=0.9,
+    soft_joint_pos_limit_factor=0.97,
     actuators={
-        "legs": IdealPDActuatorCfg(
-            joint_names_expr=[".*_hip_joint", ".*_hip2_joint", ".*_thigh_joint", ".*_calf_joint"],
+        "legs": ImplicitActuatorCfg(
+            joint_names_expr=["LFJ_scap", "LFJ_hip", "LFJ_knee"],
             effort_limit=300.0,
             velocity_limit=100.0,
             stiffness={
-                ".*_hip_joint": 0.0,
-                ".*_hip2_joint": 0.0,
-                ".*_thigh_joint": 0.0,
-                ".*_calf_joint": 0.0,
+                "LFJ_scap": 0.0,
+                "LFJ_hip": 0.0,
+                "LFJ_knee": 0.0,
             },
             damping={
-                ".*_hip_joint": 0.0,
-                ".*_hip2_joint": 0.0,
-                ".*_thigh_joint": 0.0,
-                ".*_calf_joint": 0.0,
+                "LFJ_scap": 0.0,
+                "LFJ_hip": 0.0,
+                "LFJ_knee": 0.0,
             },
-        ),
-        "feet": IdealPDActuatorCfg(
-            joint_names_expr=[".*_toe_joint"],
-            effort_limit=30.0,
-            velocity_limit=50.0,
-            stiffness={".*_toe_joint": 0.0},
-            damping={".*_toe_joint": 0.0},
         ),
     },
 )

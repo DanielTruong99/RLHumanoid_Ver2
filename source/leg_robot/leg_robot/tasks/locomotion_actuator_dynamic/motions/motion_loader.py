@@ -29,18 +29,10 @@ class MotionLoader:
 
         self.device = device
         self._dof_names = data["dof_names"].tolist()
-        self._body_names = data["body_names"].tolist()
 
         self.dof_positions = torch.tensor(data["dof_positions"], dtype=torch.float32, device=self.device)
         self.dof_velocities = torch.tensor(data["dof_velocities"], dtype=torch.float32, device=self.device)
-        self.body_positions = torch.tensor(data["body_positions"], dtype=torch.float32, device=self.device)
-        self.body_rotations = torch.tensor(data["body_rotations"], dtype=torch.float32, device=self.device)
-        self.body_linear_velocities = torch.tensor(
-            data["body_linear_velocities"], dtype=torch.float32, device=self.device
-        )
-        self.body_angular_velocities = torch.tensor(
-            data["body_angular_velocities"], dtype=torch.float32, device=self.device
-        )
+        self.dof_currents = torch.tensor(data["dof_currents"], dtype=torch.float32, device=self.device)
 
         self.dt = 1.0 / data["fps"]
         self.num_frames = self.dof_positions.shape[0]
@@ -52,20 +44,12 @@ class MotionLoader:
         """Skeleton DOF names."""
         return self._dof_names
 
-    @property
-    def body_names(self) -> list[str]:
-        """Skeleton rigid body names."""
-        return self._body_names
 
     @property
     def num_dofs(self) -> int:
         """Number of skeleton's DOFs."""
         return len(self._dof_names)
 
-    @property
-    def num_bodies(self) -> int:
-        """Number of skeleton's rigid bodies."""
-        return len(self._body_names)
 
     def _interpolate(
         self,
@@ -197,7 +181,7 @@ class MotionLoader:
 
     def sample(
         self, num_samples: int, times: Optional[np.ndarray] = None, duration: float | None = None
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Sample motion data.
 
         Args:
@@ -220,10 +204,7 @@ class MotionLoader:
         return (
             self._interpolate(self.dof_positions, blend=blend, start=index_0, end=index_1),
             self._interpolate(self.dof_velocities, blend=blend, start=index_0, end=index_1),
-            self._interpolate(self.body_positions, blend=blend, start=index_0, end=index_1),
-            self._slerp(self.body_rotations, blend=blend, start=index_0, end=index_1),
-            self._interpolate(self.body_linear_velocities, blend=blend, start=index_0, end=index_1),
-            self._interpolate(self.body_angular_velocities, blend=blend, start=index_0, end=index_1),
+            self._interpolate(self.dof_currents, blend=blend, start=index_0, end=index_1),
         )
 
     def get_dof_index(self, dof_names: list[str]) -> list[int]:
@@ -244,23 +225,6 @@ class MotionLoader:
             indexes.append(self._dof_names.index(name))
         return indexes
 
-    def get_body_index(self, body_names: list[str]) -> list[int]:
-        """Get skeleton body indexes by body names.
-
-        Args:
-            dof_names: List of body names.
-
-        Raises:
-            AssertionError: If the specified body name doesn't exist.
-
-        Returns:
-            List of body indexes.
-        """
-        indexes = []
-        for name in body_names:
-            assert name in self._body_names, f"The specified body name ({name}) doesn't exist: {self._body_names}"
-            indexes.append(self._body_names.index(name))
-        return indexes
 
 
 if __name__ == "__main__":
@@ -274,4 +238,3 @@ if __name__ == "__main__":
 
     print("- number of frames:", motion.num_frames)
     print("- number of DOFs:", motion.num_dofs)
-    print("- number of bodies:", motion.num_bodies)

@@ -24,23 +24,30 @@ MOTIONS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "motions"
 class ActuatorDynamicEnvCfg(DirectRLEnvCfg):
     """Actuator Dynamic AMP environment config (base class)."""
 
+    # rewards
+    joint_torque_reward_scale = -2.5e-7
+    joint_accel_reward_scale = -2.5e-7
+    action_rate_reward_scale = -1e-3
+    terminated_scale = -10.0
+    alive_scale = 0.0
+
     # env
-    episode_length_s = 10.0
-    decimation = 2
+    episode_length_s = 20.0
+    decimation = 4
 
     # spaces
-    observation_space = 81
-    action_space = 28
+    observation_space = 6
+    action_space = 3
     state_space = 0
     num_amp_observations = 2
-    amp_observation_space = 81
+    amp_observation_space = 6
 
     early_termination = True
     termination_height = 0.5
 
-    motion_file: str = os.path.join(MOTIONS_DIR, "humanoid_walk.npz")
+    motion_file: str = os.path.join(MOTIONS_DIR, "quadruped_actuator_dynamic.npz")
     reference_body = "base"
-    reset_strategy = "random"  # default, random, random-start
+    reset_strategy = "random-start"  # default, random, random-start
     """Strategy to be followed when resetting each environment (humanoid's pose and joint states).
 
     * default: pose and joint states are set to the initial state of the asset.
@@ -50,7 +57,7 @@ class ActuatorDynamicEnvCfg(DirectRLEnvCfg):
 
     # simulation
     sim: SimulationCfg = SimulationCfg(
-        dt=1 / 60,
+        dt=0.005,
         render_interval=decimation,
         physx=PhysxCfg(
             gpu_found_lost_pairs_capacity=2**23,
@@ -63,5 +70,4 @@ class ActuatorDynamicEnvCfg(DirectRLEnvCfg):
 
     # robot
     robot: ArticulationCfg = LEGACTUATORDYNAMIC_CFG.replace(prim_path="/World/envs/env_.*/Robot") # type: ignore
-    
 

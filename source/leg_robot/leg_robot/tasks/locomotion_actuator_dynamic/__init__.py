@@ -21,6 +21,6 @@ gym.register(
     disable_env_checker=True,
     kwargs={
         "env_cfg_entry_point": f"{__name__}.actuator_dynamic_amp_env_cfg:ActuatorDynamicEnvCfg",
-        "skrl_cfg_entry_point": f"{agents.__name__}:skrl_actuator_dynamic_amp_cfg.yaml",
+        "skrl_amp_cfg_entry_point": f"{agents.__name__}:skrl_actuator_dynamic_amp_cfg.yaml",
     },
 )

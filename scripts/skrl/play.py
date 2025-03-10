@@ -88,8 +88,10 @@ from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkp
 
 from isaaclab_rl.skrl import SkrlVecEnvWrapper
 
-import isaaclab_tasks  # noqa: F401
+# import isaaclab_tasks  # noqa: F401
+import leg_robot.tasks  # noqa: F401
 from isaaclab_tasks.utils import get_checkpoint_path, load_cfg_from_registry, parse_env_cfg
+import pandas as pd
 
 # config shortcuts
 algorithm = args_cli.algorithm.lower()
@@ -171,6 +173,7 @@ def main():
     # reset environment
     obs, _ = env.reset()
     timestep = 0
+    policy_step = 0
     # simulate environment
     while simulation_app.is_running():
         start_time = time.time()
@@ -193,6 +196,27 @@ def main():
             if timestep == args_cli.video_length:
                 break
 
+        # collect joint position datas for analysis and save to pandas dataframe
+        joint_pos = env.robot.data.joint_pos[:, env.key_joint_indexes]
+        joint_vel = env.robot.data.joint_vel[:, env.key_joint_indexes]
+
+        # if policy_step == 0:
+        #     joint_pos_data = joint_pos
+        #     joint_vel_data = joint_vel
+        # elif policy_step > 10.0 / (1.0/50.0):
+        #     # save to the file pandas dataframe
+        #     # save csv file with headers
+        #     joint_pos_df = pd.DataFrame(joint_pos_data.cpu().numpy(), columns=[f"q_scap", f"q_hip", f"q_knee"])
+        #     joint_vel_df = pd.DataFrame(joint_vel_data.cpu().numpy(), columns=[f"qd_scap", f"qd_hip", f"qd_knee"])
+        #     joint_pos_df.to_csv(os.path.join(log_dir, "joint_positions.csv"), index=False)
+        #     joint_vel_df.to_csv(os.path.join(log_dir, "joint_velocities.csv"), index=False)
+        #     break
+            
+        # else:
+        #     joint_pos_data = torch.cat((joint_pos_data, joint_pos), dim=0)
+        #     joint_vel_data = torch.cat((joint_vel_data, joint_vel), dim=0)
+
+        policy_step += 1
         # time delay for real-time evaluation
         sleep_time = dt - (time.time() - start_time)
         if args_cli.real_time and sleep_time > 0:

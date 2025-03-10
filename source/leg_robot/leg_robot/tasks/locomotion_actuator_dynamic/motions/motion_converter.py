@@ -30,9 +30,20 @@ class MotionConverter:
         headers = self.motion_data.columns.tolist()
 
         # convert all columns to numpy arrays
-        data_dict = {}
-        for header in headers:
-            data_dict[header] = self.motion_data[header].to_numpy()
+        dof_positions = self.motion_data[headers[0:3]].to_numpy()
+        # q_hip = q_hip - pi/2; q_knee = q_knee +pi/2
+        dof_positions[:, 1] = dof_positions[:, 1] - np.pi / 2
+        dof_positions[:, 2] = dof_positions[:, 2] + np.pi / 2
+
+        dof_velocities = self.motion_data[headers[3:6]].to_numpy()
+        dof_currents = self.motion_data[headers[6:]].to_numpy()
+        data_dict = {
+            "fps": np.array(50),
+            "dof_names": np.array(["LFJ_scap", "LFJ_hip", "LFJ_knee"]),
+            "dof_positions": dof_positions,
+            "dof_velocities": dof_velocities,
+            "dof_currents": dof_currents,
+        }
 
         # save to npz file
         current_path = os.path.dirname(os.path.abspath(__file__))
