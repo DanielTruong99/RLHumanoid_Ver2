@@ -27,7 +27,7 @@ class ActuatorDynamicEnvCfg(DirectRLEnvCfg):
     # rewards
     joint_torque_reward_scale = -2.5e-7
     joint_accel_reward_scale = -2.5e-7
-    action_rate_reward_scale = -1e-3
+    action_rate_reward_scale = -1e-2
     terminated_scale = -10.0
     alive_scale = 0.0
 
